@@ -23,7 +23,7 @@ const Home = () => {
         </Box>
       </Box>
       <Box bg={'white'}>
-        <Footer />
+        {/* <Footer /> */}
       </Box>
     </Box>
   );

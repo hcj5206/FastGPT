@@ -26,14 +26,14 @@ const Navbar = () => {
         label: t('home.Community'),
         key: 'community',
         onClick: () => {
-          onOpenCommunity();
+          // onOpenCommunity();
         }
       },
       {
         label: t('home.Docs'),
         key: 'docs',
         onClick: () => {
-          window.open('https://doc.fastgpt.run/docs/intro');
+          // window.open('https://doc.fastgpt.run/docs/intro');
         }
       }
     ],

@@ -14,37 +14,37 @@ const Choice = () => {
       title: t('home.Choice Open'),
       desc: t('home.Choice Open Desc'),
       tooltip: '前往 GitHub',
-      onClick: () => window.open('https://github.com/labring/FastGPT', '_blank')
+      onClick: () => { }
     },
     {
       icon: '/imgs/home/icon_2.svg',
       title: t('home.Choice QA'),
       desc: t('home.Choice QA Desc'),
-      onClick: () => {}
+      onClick: () => { }
     },
     {
       icon: '/imgs/home/icon_3.svg',
       title: t('home.Choice Visual'),
       desc: t('home.Choice Visual Desc'),
-      onClick: () => {}
+      onClick: () => { }
     },
     {
       icon: '/imgs/home/icon_4.svg',
       title: t('home.Choice Extension'),
       desc: t('home.Choice Extension Desc'),
-      onClick: () => {}
+      onClick: () => { }
     },
     {
       icon: '/imgs/home/icon_5.svg',
       title: t('home.Choice Debug'),
       desc: t('home.Choice Debug Desc'),
-      onClick: () => {}
+      onClick: () => { }
     },
     {
       icon: '/imgs/home/icon_6.svg',
       title: t('home.Choice Models'),
       desc: t('home.Choice Models Desc'),
-      onClick: () => {}
+      onClick: () => { }
     }
   ];
 
@@ -57,7 +57,7 @@ const Choice = () => {
         fontSize={['22px', '30px']}
         fontWeight={'bold'}
       >
-        {t('home.Why FastGPT')}
+        {/* {t('home.Why XiaoHu')} */}
       </Box>
       <Grid px={[5, 0]} gridTemplateColumns={['1fr', `1fr 1fr`, 'repeat(3,1fr)']} gridGap={6}>
         {list.map((item) => (
