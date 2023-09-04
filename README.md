@@ -49,7 +49,7 @@ FastGPT 是一个基于 LLM 大语言模型的知识库问答系统，提供开�
    - [x] 支持手动输入内容
    - [x] 支持 url 读取导入
    - [x] 支持 CSV 批量导入问答对
-   - [ ] 支持知识库单独设置向量模型
+   - [x] 支持知识库单独设置向量模型
    - [ ] 源文件存储
 3. 多种效果测试渠道
    - [x] 知识库单点搜索测试
@@ -62,7 +62,7 @@ FastGPT 是一个基于 LLM 大语言模型的知识库问答系统，提供开�
 5. 运营功能
    - [x] 免登录分享窗口
    - [x] Iframe 一键嵌入
-   - [ ] 统一查阅对话记录
+   - [x] 统一查阅对话记录，并对数据进行标注
 
 ## 👨‍💻 开发
 
@@ -76,18 +76,18 @@ FastGPT 是一个基于 LLM 大语言模型的知识库问答系统，提供开�
 
   由于需要部署数据库，部署完后需要等待 2~4 分钟才能正常访问。默认用了最低配置，首次访问时会有些慢。
 
-* [快开始本地开发](https://doc.fastgpt.run/docs/development)
+* [快开始本地开发](https://doc.fastgpt.run/docs/development/intro/)
 * [部署 FastGPT](https://doc.fastgpt.run/docs/installation)
-* [系统配置文件说明](https://doc.fastgpt.run/docs/installation/reference)
-* [多模型配置](https://doc.fastgpt.run/docs/installation/reference/models)
+* [系统配置文件说明](https://doc.fastgpt.run/docs/development/configuration/)
+* [多模型配置](https://doc.fastgpt.run/docs/installation/one-api/)
 * [版本升级](https://doc.fastgpt.run/docs/installation/upgrading)
 * [API 文档](https://kjqvjse66l.feishu.cn/docx/DmLedTWtUoNGX8xui9ocdUEjnNh?pre_pathname=%2Fdrive%2Fhome%2F)
 
 ## 🏘️ 社区交流群
 
-| 交流群                                              | 小助手                                         |
-| --------------------------------------------------- | ---------------------------------------------- |
-| ![](https://otnvvf-imgs.oss.laf.run/wxqun300-2.jpg) | ![](https://otnvvf-imgs.oss.laf.run/wx300.jpg) |
+添加 wx 小助手加入：
+
+![](https://otnvvf-imgs.oss.laf.run/wx300.jpg)
 
 ## 👀 其他
 

@@ -4,7 +4,7 @@ description: 'FastGPT 配置参数介绍'
 icon: 'settings'
 draft: false
 toc: true
-weight: 751
+weight: 100
 ---
 
 由于环境变量不利于配置复杂的内容，新版 FastGPT 采用了 ConfigMap 的形式挂载配置文件，你可以在 `client/data/config.json` 看到默认的配置文件。可以参考 [docker-compose 快速部署](/docs/installation/docker/) 来挂载配置文件。
@@ -37,7 +37,6 @@ weight: 751
 ...
 // 这个配置文件是系统级参数
 "SystemParams": {
-    "gitLoginSecret": "", //  Git 登录凭证
     "vectorMaxProcess": 15, // 向量生成最大进程，结合数据库性能和 key 来设置
     "qaMaxProcess": 15,  // QA 生成最大进程，结合数据库性能和 key 来设置
     "pgIvfflatProbe": 20  // pg vector 搜索探针。没有设置索引前可忽略，通常 50w 组以上才需要设置。
@@ -61,7 +60,6 @@ weight: 751
     "scripts": []
   },
   "SystemParams": {
-    "gitLoginSecret": "",
     "vectorMaxProcess": 15,
     "qaMaxProcess": 15,
     "pgIvfflatProbe": 20
@@ -71,9 +69,9 @@ weight: 751
     {
       "model": "gpt-3.5-turbo",
       "name": "GPT35-4k",
-      "contextMaxToken": 4000,
-      "quoteMaxToken": 2000,
-      "maxTemperature": 1.2,
+      "contextMaxToken": 4000, // 最大token，均按 gpt35 计算
+      "quoteMaxToken": 2000, // 引用内容最大 token
+      "maxTemperature": 1.2, // 最大温度
       "price": 0,
       "defaultSystem": ""
     },
@@ -106,7 +104,9 @@ weight: 751
     {
       "model": "text-embedding-ada-002",
       "name": "Embedding-2",
-      "price": 0
+      "price": 0,
+      "defaultToken": 500,
+      "maxToken": 3000
     }
   ]
 }

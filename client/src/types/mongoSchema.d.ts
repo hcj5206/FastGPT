@@ -102,6 +102,12 @@ export interface ChatItemSchema extends ChatItemType {
   userId: string;
   appId: string;
   time: Date;
+  userFeedback?: string;
+  adminFeedback?: {
+    kbId: string;
+    dataId: string;
+    content: string;
+  };
 }
 
 export type BillListItemType = {
@@ -135,7 +141,7 @@ export interface OpenApiSchema {
   userId: string;
   createTime: Date;
   lastUsedTime?: Date;
-  apiKey: String;
+  apiKey: string;
 }
 
 export interface PromotionRecordSchema {

@@ -1,50 +1,55 @@
 import { Box, Image, Flex, Grid, useTheme } from '@chakra-ui/react';
-import React, { useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'next-i18next';
 import MyTooltip from '@/components/MyTooltip';
-import MyIcon from '@/components/Icon';
+import { feConfigs } from '@/store/static';
 
 const Choice = () => {
   const theme = useTheme();
   const { t } = useTranslation();
 
   const list = [
-    {
-      icon: '/imgs/home/icon_1.svg',
-      title: t('home.Choice Open'),
-      desc: t('home.Choice Open Desc'),
-      tooltip: '前往 GitHub',
-      onClick: () => { }
-    },
+    ...(feConfigs?.show_git
+      ? [
+          {
+            icon: '/imgs/home/icon_1.svg',
+            title: t('home.Choice Open'),
+            desc: t('home.Choice Open Desc', { title: feConfigs?.systemTitle }),
+            tooltip: '前往 GitHub',
+            onClick: () => window.open('https://github.com/labring/FastGPT', '_blank')
+          }
+        ]
+      : [
+          {
+            icon: '/imgs/home/icon_0.svg',
+            title: t('home.Choice Fast'),
+            desc: t('home.Choice Fast Desc', { title: feConfigs?.systemTitle })
+          }
+        ]),
     {
       icon: '/imgs/home/icon_2.svg',
       title: t('home.Choice QA'),
-      desc: t('home.Choice QA Desc'),
-      onClick: () => { }
+      desc: t('home.Choice QA Desc')
     },
     {
       icon: '/imgs/home/icon_3.svg',
       title: t('home.Choice Visual'),
-      desc: t('home.Choice Visual Desc'),
-      onClick: () => { }
+      desc: t('home.Choice Visual Desc')
     },
     {
       icon: '/imgs/home/icon_4.svg',
       title: t('home.Choice Extension'),
-      desc: t('home.Choice Extension Desc'),
-      onClick: () => { }
+      desc: t('home.Choice Extension Desc')
     },
     {
       icon: '/imgs/home/icon_5.svg',
       title: t('home.Choice Debug'),
-      desc: t('home.Choice Debug Desc'),
-      onClick: () => { }
+      desc: t('home.Choice Debug Desc')
     },
     {
       icon: '/imgs/home/icon_6.svg',
       title: t('home.Choice Models'),
-      desc: t('home.Choice Models Desc'),
-      onClick: () => { }
+      desc: t('home.Choice Models Desc')
     }
   ];
 
@@ -57,7 +62,7 @@ const Choice = () => {
         fontSize={['22px', '30px']}
         fontWeight={'bold'}
       >
-        {/* {t('home.Why XiaoHu')} */}
+        {t('home.Why FastGPT', { title: feConfigs?.systemTitle })}
       </Box>
       <Grid px={[5, 0]} gridTemplateColumns={['1fr', `1fr 1fr`, 'repeat(3,1fr)']} gridGap={6}>
         {list.map((item) => (
@@ -72,7 +77,7 @@ const Choice = () => {
               _hover={{
                 bg: 'rgba(255,255,255,0.8)'
               }}
-              onClick={item.onClick}
+              onClick={() => item.onClick?.()}
             >
               <Flex
                 flex={'0 0 48px'}

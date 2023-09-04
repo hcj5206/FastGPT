@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { getTrainingQueueLen } from '@/api/plugins/kb';
 import MyTooltip from '@/components/MyTooltip';
 import { QuestionOutlineIcon } from '@chakra-ui/icons';
+import { feConfigs } from '@/store/static';
 
 const ImportData = dynamic(() => import('./components/Import'), {
   ssr: false
@@ -119,7 +120,10 @@ const Detail = ({ kbId, currentTab }: { kbId: string; currentTab: `${TabEnum}` }
               <Flex justifyContent={'center'} alignItems={'center'}>
                 <MyIcon mr={1} name="overviewLight" w={'16px'} color={'green.500'} />
                 <Box>{t('dataset.System Data Queue')}</Box>
-                <MyTooltip label={t('dataset.Queue Desc')} placement={'top'}>
+                <MyTooltip
+                  label={t('dataset.Queue Desc', { title: feConfigs?.systemTitle })}
+                  placement={'top'}
+                >
                   <QuestionOutlineIcon ml={1} w={'16px'} />
                 </MyTooltip>
               </Flex>
@@ -165,12 +169,14 @@ const Detail = ({ kbId, currentTab }: { kbId: string; currentTab: `${TabEnum}` }
           </Box>
         )}
 
-        <Box flex={'1 0 0'} h={'100%'} pb={[4, 0]}>
-          {currentTab === TabEnum.data && <DataCard kbId={kbId} />}
-          {currentTab === TabEnum.import && <ImportData kbId={kbId} />}
-          {currentTab === TabEnum.test && <Test kbId={kbId} />}
-          {currentTab === TabEnum.info && <Info ref={InfoRef} kbId={kbId} form={form} />}
-        </Box>
+        {!!kbDetail._id && (
+          <Box flex={'1 0 0'} h={'100%'} pb={[4, 0]}>
+            {currentTab === TabEnum.data && <DataCard kbId={kbId} />}
+            {currentTab === TabEnum.import && <ImportData kbId={kbId} />}
+            {currentTab === TabEnum.test && <Test kbId={kbId} />}
+            {currentTab === TabEnum.info && <Info ref={InfoRef} kbId={kbId} form={form} />}
+          </Box>
+        )}
       </Box>
     </PageContainer>
   );

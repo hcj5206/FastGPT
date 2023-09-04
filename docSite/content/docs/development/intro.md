@@ -1,10 +1,10 @@
 ---
-weight: 500
-title: '开发指南'
+title: '快速开始'
 description: '对 FastGPT 进行开发调试'
 icon: 'developer_guide'
 draft: false
-images: []
+toc: true
+weight: -10
 ---
 
 本文档介绍了如何设置开发环境以构建和测试 [FastGPT](https://fastgpt.run)。
@@ -49,7 +49,7 @@ client 目录下为 FastGPT 核心代码。NextJS 框架前后端放在一起，
 
 **2. config 配置文件**
 
-复制 data/config.json 文件，生成一个 data/config.local.json 配置文件。具体的参数说明，可参考 [config 配置说名](/docs/installation/reference/configuration)
+复制 data/config.json 文件，生成一个 data/config.local.json 配置文件。具体的参数说明，可参考 [config 配置说名](/docs/development/configuration)
 
 **注意：json 配置文件不能包含注释，介绍中为了方便看才加入的注释**
 

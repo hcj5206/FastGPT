@@ -19,7 +19,9 @@ export type FeConfigsType = {
   show_register?: boolean;
   show_appStore?: boolean;
   show_userDetail?: boolean;
+  show_contact?: boolean;
   show_git?: boolean;
+  show_doc?: boolean;
   systemTitle?: string;
   authorText?: string;
   beianText?: string;
@@ -29,7 +31,6 @@ export type FeConfigsType = {
 };
 export type SystemEnvType = {
   pluginBaseUrl?: string;
-  gitLoginSecret?: string;
   vectorMaxProcess: number;
   qaMaxProcess: number;
   pgIvfflatProbe: number;

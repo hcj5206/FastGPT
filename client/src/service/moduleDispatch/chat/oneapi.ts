@@ -1,6 +1,5 @@
 import type { NextApiResponse } from 'next';
 import { sseResponse } from '@/service/utils/tools';
-import { OpenAiChatEnum } from '@/constants/model';
 import { adaptChatItem_openAI, countOpenAIToken } from '@/utils/plugin/openai';
 import { modelToolMap } from '@/utils/plugin';
 import { ChatContextFilter } from '@/service/utils/chat/index';
@@ -21,7 +20,7 @@ import { AppModuleItemType } from '@/types/app';
 
 export type ChatProps = {
   res: NextApiResponse;
-  model: `${OpenAiChatEnum}`;
+  model: string;
   temperature?: number;
   maxToken?: number;
   history?: ChatItemType[];
@@ -44,7 +43,7 @@ export type ChatResponse = {
 export const dispatchChatCompletion = async (props: Record<string, any>): Promise<ChatResponse> => {
   let {
     res,
-    model,
+    model = global.chatModels[0]?.model,
     temperature = 0,
     maxToken = 4000,
     stream = false,
@@ -68,7 +67,7 @@ export const dispatchChatCompletion = async (props: Record<string, any>): Promis
     return Promise.reject('The chat model is undefined, you need to select a chat model.');
   }
 
-  const { filterQuoteQA, quotePrompt } = filterQuote({
+  const { filterQuoteQA, quotePrompt, hasQuoteOutput } = filterQuote({
     quoteQA,
     model: modelConstantsData
   });
@@ -89,7 +88,8 @@ export const dispatchChatCompletion = async (props: Record<string, any>): Promis
     quotePrompt,
     userChatInput,
     systemPrompt,
-    limitPrompt
+    limitPrompt,
+    hasQuoteOutput
   });
   const { max_tokens } = getMaxTokens({
     model: modelConstantsData,
@@ -124,7 +124,7 @@ export const dispatchChatCompletion = async (props: Record<string, any>): Promis
       stream
     },
     {
-      timeout: stream ? 60000 : 480000,
+      timeout: stream ? 120000 : 480000,
       responseType: stream ? 'stream' : 'json',
       ...axiosConfig(userOpenaiAccount)
     }
@@ -197,7 +197,6 @@ function filterQuote({
   model: ChatModelItemType;
 }) {
   const sliceResult = modelToolMap.tokenSlice({
-    model: model.model,
     maxToken: model.quoteMaxToken,
     messages: quoteQA.map((item) => ({
       obj: ChatRoleEnum.System,
@@ -211,13 +210,16 @@ function filterQuote({
   const quotePrompt =
     filterQuoteQA.length > 0
       ? `"""${filterQuoteQA
-          .map((item) => (item.a ? `[${item.q}\n${item.a}]` : `${item.q}`))
-          .join('\n\n')}"""`
+          .map((item) =>
+            item.a ? `{instruction:"${item.q}",output:"${item.a}"}` : `{instruction:"${item.q}"}`
+          )
+          .join('\n')}"""`
       : '';
 
   return {
     filterQuoteQA,
-    quotePrompt
+    quotePrompt,
+    hasQuoteOutput: !!filterQuoteQA.find((item) => item.a)
   };
 }
 function getChatMessages({
@@ -226,7 +228,8 @@ function getChatMessages({
   systemPrompt,
   limitPrompt,
   userChatInput,
-  model
+  model,
+  hasQuoteOutput
 }: {
   quotePrompt: string;
   history: ChatProps['history'];
@@ -234,15 +237,19 @@ function getChatMessages({
   limitPrompt: string;
   userChatInput: string;
   model: ChatModelItemType;
+  hasQuoteOutput: boolean;
 }) {
   const limitText = (() => {
     if (!quotePrompt) {
       return limitPrompt;
     }
+    const defaultPrompt = `三引号引用的内容是我提供给你的知识，它们拥有最高优先级。instruction 是相关介绍${
+      hasQuoteOutput ? '，output 是预期回答或补充' : ''
+    }，使用引用内容来回答我下面的问题。`;
     if (limitPrompt) {
-      return `Use the provided documents delimited by triple quotes to answer questions. ${limitPrompt}`;
+      return `${defaultPrompt}${limitPrompt}`;
     }
-    return `Use the provided documents delimited by triple quotes to answer questions.Your task is to answer the question using only the provided documents. If the documents does not contain the information needed to answer this question then simply write: "你的问题没有在知识库中体现"`;
+    return `${defaultPrompt}\n回答内容限制：你仅回答三引号中提及的内容，下面我提出的问题与引用内容无关时，你可以直接回复: "你的问题没有在知识库中体现"`;
   })();
 
   const messages: ChatItemType[] = [
@@ -303,7 +310,6 @@ function getMaxTokens({
   /* count response max token */
 
   const promptsToken = modelToolMap.countTokens({
-    model: model.model,
     messages: filterMessages
   });
   maxToken = maxToken + promptsToken > tokensLimit ? tokensLimit - promptsToken : maxToken;
@@ -374,7 +380,6 @@ async function streamResponse({
   }
 
   if (error) {
-    console.log(error);
     return Promise.reject(error);
   }
 

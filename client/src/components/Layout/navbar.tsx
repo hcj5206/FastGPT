@@ -106,7 +106,13 @@ const Navbar = ({ unread }: { unread: number }) => {
         cursor={'pointer'}
         onClick={() => router.push('/account')}
       >
-        <Avatar w={'36px'} h={'36px'} src={userInfo?.avatar} fallbackSrc={HUMAN_ICON} />
+        <Avatar
+          w={'36px'}
+          h={'36px'}
+          borderRadius={'none'}
+          src={userInfo?.avatar}
+          fallbackSrc={HUMAN_ICON}
+        />
       </Box>
       {/* 导航列表 */}
       <Box flex={1}>
@@ -161,20 +167,20 @@ const Navbar = ({ unread }: { unread: number }) => {
           </Link>
         </Box>
       )}
-      <MyTooltip label={t('home.Docs')} placement={'right-end'}>
-        <Box
-          {...itemStyles}
-          mb={0}
-          color={'#9096a5'}
-          onClick={() => {
-            window.open(`https://doc.fastgpt.run/docs/intro`);
-          }}
-        >
-          <Badge count={unread}>
+      {feConfigs?.show_doc && (
+        <MyTooltip label={t('home.Docs')} placement={'right-end'}>
+          <Box
+            {...itemStyles}
+            mb={0}
+            color={'#9096a5'}
+            onClick={() => {
+              window.open(`https://doc.fastgpt.run/docs/intro`);
+            }}
+          >
             <MyIcon name={'courseLight'} width={'26px'} height={'26px'} />
-          </Badge>
-        </Box>
-      </MyTooltip>
+          </Box>
+        </MyTooltip>
+      )}
       <Language {...itemStyles} />
       {feConfigs?.show_git && (
         <MyTooltip label={`Git Star: ${gitStar}`} placement={'right-end'}>
