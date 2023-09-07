@@ -532,6 +532,13 @@ const Settings = ({ appId }: { appId: string }) => {
                 variables.map((item) => (item.id === variable.id ? variable : item))
               );
             } else {
+              // auth same key
+              if (variables.find((item) => item.key === variable.key)) {
+                return toast({
+                  status: 'warning',
+                  title: t('app.Variable Key Repeat Tip')
+                });
+              }
               appendVariable(variable);
             }
 
@@ -542,7 +549,10 @@ const Settings = ({ appId }: { appId: string }) => {
       {isOpenKbSelect && (
         <KBSelectModal
           kbList={myKbList}
-          activeKbs={selectedKbList.map((item) => ({ kbId: item._id }))}
+          activeKbs={selectedKbList.map((item) => ({
+            kbId: item._id,
+            vectorModel: item.vectorModel
+          }))}
           onClose={onCloseKbSelect}
           onChange={replaceKbList}
         />
@@ -636,6 +646,7 @@ const ChatTest = ({ appId }: { appId: string }) => {
           ref={ChatBoxRef}
           appAvatar={appDetail.avatar}
           userAvatar={userInfo?.avatar}
+          showMarkIcon
           {...getSpecialModule(modules)}
           onStartChat={startChat}
           onDelMessage={() => {}}

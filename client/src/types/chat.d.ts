@@ -2,6 +2,8 @@ import { ChatRoleEnum } from '@/constants/chat';
 import type { InitChatResponse, InitShareChatResponse } from '@/api/response/chat';
 import { TaskResponseKeyEnum } from '@/constants/chat';
 import { ClassifyQuestionAgentItemType } from './app';
+import { ChatItemSchema } from './mongoSchema';
+import { KbDataItemType } from './plugin';
 
 export type ExportChatType = 'md' | 'pdf' | 'html';
 
@@ -9,6 +11,8 @@ export type ChatItemType = {
   dataId?: string;
   obj: `${ChatRoleEnum}`;
   value: string;
+  userFeedback?: string;
+  adminFeedback?: ChatItemSchema['adminFeedback'];
   [TaskResponseKeyEnum.responseData]?: ChatHistoryItemResType[];
 };
 
@@ -38,12 +42,8 @@ export type ShareChatType = InitShareChatResponse & {
   history: ShareChatHistoryItemType;
 };
 
-export type QuoteItemType = {
+export type QuoteItemType = KbDataItemType & {
   kb_id: string;
-  id: string;
-  q: string;
-  a: string;
-  source?: string;
 };
 
 export type ChatHistoryItemResType = {

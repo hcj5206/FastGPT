@@ -9,7 +9,9 @@ import {
   Th,
   Td,
   Tbody,
-  useTheme
+  useTheme,
+  useDisclosure,
+  ModalBody
 } from '@chakra-ui/react';
 import MyIcon from '@/components/Icon';
 import { useTranslation } from 'next-i18next';
@@ -19,15 +21,28 @@ import dayjs from 'dayjs';
 import { ChatSourceMap, HUMAN_ICON } from '@/constants/chat';
 import { AppLogsListItemType } from '@/types/app';
 import { useGlobalStore } from '@/store/global';
-import MyTooltip from '@/components/MyTooltip';
 import ChatBox, { type ComponentRef } from '@/components/ChatBox';
 import { useQuery } from '@tanstack/react-query';
 import { getInitChatSiteInfo } from '@/api/chat';
 import Tag from '@/components/Tag';
+import MyModal from '@/components/MyModal';
+import DateRangePicker, { type DateRangeType } from '@/components/DateRangePicker';
+import { addDays } from 'date-fns';
 
 const Logs = ({ appId }: { appId: string }) => {
   const { t } = useTranslation();
   const { isPc } = useGlobalStore();
+
+  const [dateRange, setDateRange] = useState<DateRangeType>({
+    from: addDays(new Date(), -7),
+    to: new Date()
+  });
+
+  const {
+    isOpen: isOpenMarkDesc,
+    onOpen: onOpenMarkDesc,
+    onClose: onCloseMarkDesc
+  } = useDisclosure();
 
   const {
     data: logs,
@@ -39,7 +54,9 @@ const Logs = ({ appId }: { appId: string }) => {
     api: getAppChatLogs,
     pageSize: 20,
     params: {
-      appId
+      appId,
+      dateStart: dateRange.from || new Date(),
+      dateEnd: addDays(dateRange.to || new Date(), 1)
     }
   });
 
@@ -54,7 +71,16 @@ const Logs = ({ appId }: { appId: string }) => {
               {t('app.Chat logs')}
             </Box>
             <Box color={'myGray.500'} fontSize={'sm'}>
-              {t('app.Chat Logs Tips')}
+              {t('app.Chat Logs Tips')},{' '}
+              <Box
+                as={'span'}
+                mr={2}
+                textDecoration={'underline'}
+                cursor={'pointer'}
+                onClick={onOpenMarkDesc}
+              >
+                {t('chat.Read Mark Description')}
+              </Box>
             </Box>
           </>
         )}
@@ -69,6 +95,8 @@ const Logs = ({ appId }: { appId: string }) => {
               <Th>{t('app.Logs Time')}</Th>
               <Th>{t('app.Logs Title')}</Th>
               <Th>{t('app.Logs Message Total')}</Th>
+              <Th>{t('app.Feedback Count')}</Th>
+              <Th>{t('app.Mark Count')}</Th>
             </Tr>
           </Thead>
           <Tbody>
@@ -86,14 +114,32 @@ const Logs = ({ appId }: { appId: string }) => {
                   {item.title}
                 </Td>
                 <Td>{item.messageCount}</Td>
+                <Td w={'100px'}>
+                  {!!item?.feedbackCount ? (
+                    <Box display={'inline-block'}>
+                      <Flex
+                        bg={'#FFF2EC'}
+                        color={'#C96330'}
+                        px={3}
+                        py={1}
+                        alignItems={'center'}
+                        borderRadius={'lg'}
+                        fontWeight={'bold'}
+                      >
+                        <MyIcon mr={1} name={'badLight'} color={'#C96330'} w={'14px'} />
+                        {item.feedbackCount}
+                      </Flex>
+                    </Box>
+                  ) : (
+                    <>-</>
+                  )}
+                </Td>
+                <Td>{item.markCount}</Td>
               </Tr>
             ))}
           </Tbody>
         </Table>
       </TableContainer>
-      <Box p={4}>
-        <Pagination />
-      </Box>
       {logs.length === 0 && !isLoading && (
         <Flex h={'100%'} flexDirection={'column'} alignItems={'center'} pt={'10vh'}>
           <MyIcon name="empty" w={'48px'} h={'48px'} color={'transparent'} />
@@ -102,6 +148,18 @@ const Logs = ({ appId }: { appId: string }) => {
           </Box>
         </Flex>
       )}
+      <Flex w={'100%'} p={4} alignItems={'center'} justifyContent={'flex-end'}>
+        <DateRangePicker
+          defaultDate={dateRange}
+          position="top"
+          onChange={setDateRange}
+          onSuccess={() => getData(1)}
+        />
+        <Box ml={3}>
+          <Pagination />
+        </Box>
+      </Flex>
+
       {!!detailLogsId && (
         <DetailLogsModal
           appId={appId}
@@ -109,6 +167,13 @@ const Logs = ({ appId }: { appId: string }) => {
           onClose={() => setDetailLogsId(undefined)}
         />
       )}
+      <MyModal
+        isOpen={isOpenMarkDesc}
+        onClose={onCloseMarkDesc}
+        title={t('chat.Mark Description Title')}
+      >
+        <ModalBody whiteSpace={'pre-wrap'}>{t('chat.Mark Description')}</ModalBody>
+      </MyModal>
     </Flex>
   );
 };
@@ -225,9 +290,11 @@ function DetailLogsModal({
             chatId={chatId}
             appAvatar={chat?.app.avatar}
             userAvatar={HUMAN_ICON}
+            feedbackType={'admin'}
+            showMarkIcon
+            showVoiceIcon={false}
             variableModules={chat?.app.variableModules}
             welcomeText={chat?.app.welcomeText}
-            onUpdateVariable={(e) => {}}
           />
         </Box>
       </Flex>

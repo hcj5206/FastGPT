@@ -2,7 +2,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import { jsonRes } from '@/service/response';
 import { authBalanceByUid, authUser } from '@/service/utils/auth';
 import { withNextCors } from '@/service/utils/tools';
-import { getAIChatApi, axiosConfig } from '@/service/ai/openai';
+import { getAIChatApi, axiosConfig } from '@/service/lib/openai';
 import { pushGenerateVectorBill } from '@/service/events/pushBill';
 
 type Props = {
@@ -66,14 +66,14 @@ export async function getVector({
         ...axiosConfig()
       }
     )
-    .then((res) => {
+    .then(async (res) => {
       if (!res.data?.data?.[0]?.embedding) {
         // @ts-ignore
-        return Promise.reject(res.data?.error?.message || 'Embedding Error');
+        return Promise.reject(res.data?.error?.message || 'Embedding API Error');
       }
       return {
         tokenLen: res.data.usage.total_tokens || 0,
-        vectors: res.data.data.map((item) => unityDimensional(item.embedding))
+        vectors: await Promise.all(res.data.data.map((item) => unityDimensional(item.embedding)))
       };
     });
 
@@ -88,6 +88,7 @@ export async function getVector({
 }
 
 function unityDimensional(vector: number[]) {
+  if (vector.length > 1536) return Promise.reject('向量维度不能超过 1536');
   let resultVector = vector;
   const vectorLen = vector.length;
 

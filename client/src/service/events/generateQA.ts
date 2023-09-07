@@ -5,10 +5,11 @@ import { TrainingModeEnum } from '@/constants/plugin';
 import { ERROR_ENUM } from '../errorCode';
 import { sendInform } from '@/pages/api/user/inform/send';
 import { authBalanceByUid } from '../utils/auth';
-import { axiosConfig, getAIChatApi } from '../ai/openai';
+import { axiosConfig, getAIChatApi } from '../lib/openai';
 import { ChatCompletionRequestMessage } from 'openai';
 import { modelToolMap } from '@/utils/plugin';
 import { gptMessage2ChatType } from '@/utils/adapt';
+import { addLog } from '../utils/tools';
 
 const reduceQueue = () => {
   global.qaQueueLen = global.qaQueueLen > 0 ? global.qaQueueLen - 1 : 0;
@@ -37,7 +38,7 @@ export async function generateQA(): Promise<any> {
       prompt: 1,
       q: 1,
       source: 1,
-      model: 1
+      file_id: 1
     });
 
     // task preemption
@@ -64,14 +65,14 @@ export async function generateQA(): Promise<any> {
         const messages: ChatCompletionRequestMessage[] = [
           {
             role: 'system',
-            content: `你是出题人，${
-              data.prompt || '我会发送一段长文本'
-            }，请从中提取出 25 个问题和答案. 答案详细完整，并按下面格式返回: 
+            content: `我会给你发送一段长文本，${
+              data.prompt ? `是${data.prompt}，` : ''
+            }请学习它，并用 markdown 格式给出 25 个问题和答案，问题可以多样化、自由扩展；答案要详细、解读到位，答案包含普通文本、链接、代码、表格、公示、媒体链接等。按下面 QA 问答格式返回: 
 Q1:
 A1:
 Q2:
 A2:
-...`
+……`
           },
           {
             role: 'user',
@@ -105,11 +106,16 @@ A2:
             const result = formatSplitText(answer || ''); // 格式化后的QA对
             console.log(`split result length: `, result.length);
             // 计费
-            pushQABill({
-              userId: data.userId,
-              totalTokens,
-              appName: 'QA 拆分'
-            });
+            if (result.length > 0) {
+              pushQABill({
+                userId: data.userId,
+                totalTokens,
+                appName: 'QA 拆分'
+              });
+            } else {
+              addLog.info(`QA result 0:`, { answer });
+            }
+
             return {
               rawContent: answer,
               result
@@ -130,7 +136,8 @@ A2:
       kbId,
       data: responseList.map((item) => ({
         ...item,
-        source: data.source
+        source: data.source,
+        file_id: data.file_id
       })),
       userId,
       mode: TrainingModeEnum.index

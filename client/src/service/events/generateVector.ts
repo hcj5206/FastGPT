@@ -1,10 +1,10 @@
-import { openaiAccountError } from '../errorCode';
 import { insertKbItem } from '@/service/pg';
 import { getVector } from '@/pages/api/openapi/plugin/vector';
 import { TrainingData } from '../models/trainingData';
 import { ERROR_ENUM } from '../errorCode';
 import { TrainingModeEnum } from '@/constants/plugin';
 import { sendInform } from '@/pages/api/user/inform/send';
+import { addLog } from '../utils/tools';
 
 const reduceQueue = () => {
   global.vectorQueueLen = global.vectorQueueLen > 0 ? global.vectorQueueLen - 1 : 0;
@@ -38,6 +38,7 @@ export async function generateVector(): Promise<any> {
       q: 1,
       a: 1,
       source: 1,
+      file_id: 1,
       vectorModel: 1
     });
 
@@ -54,8 +55,8 @@ export async function generateVector(): Promise<any> {
 
     dataItems = [
       {
-        q: data.q,
-        a: data.a
+        q: data.q.replace(/[\x00-\x08]/g, ' '),
+        a: data.a.replace(/[\x00-\x08]/g, ' ')
       }
     ];
 
@@ -74,6 +75,7 @@ export async function generateVector(): Promise<any> {
         q: dataItems[i].q,
         a: dataItems[i].a,
         source: data.source,
+        file_id: data.file_id,
         vector
       }))
     });
@@ -88,10 +90,15 @@ export async function generateVector(): Promise<any> {
     reduceQueue();
     // log
     if (err?.response) {
-      console.log('openai error: 生成向量错误');
-      console.log(err.response?.status, err.response?.statusText, err.response?.data);
+      addLog.info('openai error: 生成向量错误', {
+        status: err.response?.status,
+        stateusText: err.response?.statusText,
+        data: err.response?.data
+      });
     } else {
-      console.log('生成向量错误:', err);
+      addLog.info('openai error: 生成向量错误', {
+        err
+      });
     }
 
     // message error or openai account error
@@ -99,7 +106,9 @@ export async function generateVector(): Promise<any> {
       err?.message === 'invalid message format' ||
       err.response?.data?.error?.type === 'invalid_request_error'
     ) {
-      console.log(dataItems);
+      addLog.info('invalid message format', {
+        dataItems
+      });
       try {
         await TrainingData.findByIdAndUpdate(trainingId, {
           lockTime: new Date('2998/5/5')
@@ -110,28 +119,30 @@ export async function generateVector(): Promise<any> {
 
     // err vector data
     if (err?.code === 500) {
-      await TrainingData.findByIdAndRemove(trainingId);
+      await TrainingData.findByIdAndDelete(trainingId);
       return generateVector();
     }
 
     // 账号余额不足，删除任务
     if (userId && err === ERROR_ENUM.insufficientQuota) {
-      sendInform({
-        type: 'system',
-        title: '索引生成任务中止',
-        content:
-          '由于账号余额不足，索引生成任务中止，重新充值后将会继续。暂停的任务将在 7 天后被删除。',
-        userId
-      });
-      console.log('余额不足，暂停向量生成任务');
-      await TrainingData.updateMany(
-        {
+      try {
+        sendInform({
+          type: 'system',
+          title: '索引生成任务中止',
+          content:
+            '由于账号余额不足，索引生成任务中止，重新充值后将会继续。暂停的任务将在 7 天后被删除。',
           userId
-        },
-        {
-          lockTime: new Date('2999/5/5')
-        }
-      );
+        });
+        console.log('余额不足，暂停向量生成任务');
+        await TrainingData.updateMany(
+          {
+            userId
+          },
+          {
+            lockTime: new Date('2999/5/5')
+          }
+        );
+      } catch (error) {}
       return generateVector();
     }
 

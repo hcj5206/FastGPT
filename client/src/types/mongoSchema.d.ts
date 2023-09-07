@@ -17,6 +17,7 @@ export interface UserModelSchema {
   inviterId?: string;
   openaiKey: string;
   createTime: number;
+  timezone: string;
   openaiAccount?: {
     key: string;
     baseUrl: string;
@@ -78,6 +79,7 @@ export interface TrainingDataSchema {
   q: string;
   a: string;
   source: string;
+  file_id: string;
 }
 
 export interface ChatSchema {
@@ -102,6 +104,12 @@ export interface ChatItemSchema extends ChatItemType {
   userId: string;
   appId: string;
   time: Date;
+  userFeedback?: string;
+  adminFeedback?: {
+    kbId: string;
+    dataId: string;
+    content: string;
+  };
 }
 
 export type BillListItemType = {
@@ -135,7 +143,7 @@ export interface OpenApiSchema {
   userId: string;
   createTime: Date;
   lastUsedTime?: Date;
-  apiKey: String;
+  apiKey: string;
 }
 
 export interface PromotionRecordSchema {

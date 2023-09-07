@@ -6,6 +6,8 @@ import axios from 'axios';
 type LoginStoreType = { provider: 'git'; lastRoute: string };
 
 type State = {
+  lastRoute: string;
+  setLastRoute: (e: string) => void;
   loginStore?: LoginStoreType;
   setLoginStore: (e: LoginStoreType) => void;
   loading: boolean;
@@ -22,6 +24,12 @@ export const useGlobalStore = create<State>()(
   devtools(
     persist(
       immer((set, get) => ({
+        lastRoute: '/app/list',
+        setLastRoute(e) {
+          set((state) => {
+            state.lastRoute = e;
+          });
+        },
         loginStore: undefined,
         setLoginStore(e) {
           set((state) => {
@@ -50,7 +58,7 @@ export const useGlobalStore = create<State>()(
             state.isPc = val;
           });
         },
-        gitStar: 2700,
+        gitStar: 3700,
         async loadGitStar() {
           try {
             const { data: git } = await axios.get('https://api.github.com/repos/labring/FastGPT');

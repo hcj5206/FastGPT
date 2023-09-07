@@ -55,11 +55,11 @@ brew install orbstack
 {{< tab tabName="Windows" >}}
 {{< markdownify >}}
 
-> 我们建议将源代码和其他数据绑定到 Linux 容器中时，将其存储在 Linux 文件系统中，而不是 Windows 文件系统中。
->
-> 可以选择直接[使用 WSL 2 后端在 Windows 中安装 Docker Desktop](https://docs.docker.com/desktop/wsl/)。
->
-> 也可以直接[在 WSL 2 中安装命令行版本的 Docker](https://nickjanetakis.com/blog/install-docker-in-wsl-2-without-docker-desktop)。
+我们建议将源代码和其他数据绑定到 Linux 容器中时，将其存储在 Linux 文件系统中，而不是 Windows 文件系统中。
+
+可以选择直接[使用 WSL 2 后端在 Windows 中安装 Docker Desktop](https://docs.docker.com/desktop/wsl/)。
+
+也可以直接[在 WSL 2 中安装命令行版本的 Docker](https://nickjanetakis.com/blog/install-docker-in-wsl-2-without-docker-desktop)。
 
 {{< /markdownify >}}
 {{< /tab >}}
@@ -133,6 +133,7 @@ services:
       - DB_MAX_LINK=5 # database max link
       - TOKEN_KEY=any
       - ROOT_KEY=root_key
+      - FILE_TOKEN_KEY=filetoken
       # mongo 配置，不需要改. 如果连不上，可能需要去掉 ?authSource=admin
       - MONGODB_URI=mongodb://username:password@mongo:27017/fastgpt?authSource=admin
       # pg配置. 不需要改
@@ -158,76 +159,16 @@ docker-compose up -d
 
 ### 如何更新？
 
-执行 `docker-compose up -d` 会自动拉取最新镜像，一般情况下不需要执行额外操作。
+执行下面命令会自动拉取最新镜像，一般情况下不需要执行额外操作。
+
+```bash
+docker-compose pull
+docker-compose up -d
+```
 
 ### 如何自定义配置文件？
 
-需要在 `docker-compose.yml` 同级目录创建一个 `config.json` 文件，内容如下：
-
-```json
-{
-  "FeConfig": {
-    "show_emptyChat": true,
-    "show_register": false,
-    "show_appStore": false,
-    "show_userDetail": false,
-    "show_git": true,
-    "systemTitle": "FastGPT",
-    "authorText": "Made by FastGPT Team.",
-    "gitLoginKey": "",
-    "scripts": []
-  },
-  "SystemParams": {
-    "gitLoginSecret": "",
-    "vectorMaxProcess": 15,
-    "qaMaxProcess": 15,
-    "pgIvfflatProbe": 20
-  },
-  "plugins": {},
-  "ChatModels": [
-    {
-      "model": "gpt-3.5-turbo",
-      "name": "GPT35-4k",
-      "contextMaxToken": 4000,
-      "quoteMaxToken": 2000,
-      "maxTemperature": 1.2,
-      "price": 0,
-      "defaultSystem": ""
-    },
-    {
-      "model": "gpt-3.5-turbo-16k",
-      "name": "GPT35-16k",
-      "contextMaxToken": 16000,
-      "quoteMaxToken": 8000,
-      "maxTemperature": 1.2,
-      "price": 0,
-      "defaultSystem": ""
-    },
-    {
-      "model": "gpt-4",
-      "name": "GPT4-8k",
-      "contextMaxToken": 8000,
-      "quoteMaxToken": 4000,
-      "maxTemperature": 1.2,
-      "price": 0,
-      "defaultSystem": ""
-    }
-  ],
-  "QAModel": {
-    "model": "gpt-3.5-turbo-16k",
-    "name": "GPT35-16k",
-    "maxToken": 16000,
-    "price": 0
-  },
-  "VectorModels": [
-    {
-      "model": "text-embedding-ada-002",
-      "name": "Embedding-2",
-      "price": 0
-    }
-  ]
-}
-```
+需要在 `docker-compose.yml` 同级目录创建一个 `config.json` 文件，内容参考: [配置详解](/docs/development/configuration)
 
 然后修改 `docker-compose.yml` 中的 `fastgpt` 容器内容，增加挂载选项即可：
 
@@ -251,4 +192,4 @@ fastgpt:
     - ./config.json:/app/data/config.json
 ```
 
-> 参考[配置详解](/docs/installation/reference/configuration/)
+> 参考[配置详解](/docs/development/configuration)

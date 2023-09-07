@@ -154,7 +154,13 @@ const Info = (
         <Box flex={['0 0 90px', '0 0 160px']} w={0}>
           索引模型
         </Box>
-        <Box flex={[1, '0 0 300px']}>{getValues('vectorModelName')}</Box>
+        <Box flex={[1, '0 0 300px']}>{getValues('vectorModel').name}</Box>
+      </Flex>
+      <Flex mt={8} w={'100%'} alignItems={'center'}>
+        <Box flex={['0 0 90px', '0 0 160px']} w={0}>
+          MaxTokens
+        </Box>
+        <Box flex={[1, '0 0 300px']}>{getValues('vectorModel').maxToken}</Box>
       </Flex>
       <Flex mt={5} w={'100%'} alignItems={'center'}>
         <Box flex={['0 0 90px', '0 0 160px']} w={0}>

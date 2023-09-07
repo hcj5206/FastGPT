@@ -31,7 +31,7 @@ const Kb = () => {
   const { toast } = useToast();
   const { openConfirm, ConfirmModal } = useConfirm({
     title: '删除提示',
-    content: '确认删除该知识库？'
+    content: '确认删除该知识库？知识库相关的文件、记录将永久删除，无法恢复！'
   });
   const { myKbList, loadKbList, setKbList } = useUserStore();
 
@@ -141,7 +141,7 @@ const Kb = () => {
             </Box>
             <Flex justifyContent={'flex-end'} alignItems={'center'} fontSize={'sm'}>
               <MyIcon mr={1} name="kbTest" w={'12px'} />
-              <Box color={'myGray.500'}>{kb.vectorModelName}</Box>
+              <Box color={'myGray.500'}>{kb.vectorModel.name}</Box>
             </Flex>
           </Card>
         ))}

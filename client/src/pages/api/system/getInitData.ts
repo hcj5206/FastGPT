@@ -39,9 +39,13 @@ const defaultFeConfigs = {
   show_register: false,
   show_appStore: false,
   show_userDetail: false,
+  show_contact: true,
   show_git: true,
+  show_doc: true,
   systemTitle: 'FastGPT',
-  authorText: 'Made by FastGPT Team.'
+  authorText: 'Made by FastGPT Team.',
+  gitLoginKey: '',
+  scripts: []
 };
 const defaultChatModels = [
   {
@@ -76,16 +80,20 @@ const defaultQAModel = {
   price: 0
 };
 
-const defaultVectorModels = [
+const defaultVectorModels: VectorModelItemType[] = [
   {
     model: 'text-embedding-ada-002',
     name: 'Embedding-2',
-    price: 0
+    price: 0,
+    defaultToken: 500,
+    maxToken: 3000
   }
 ];
 
 export async function getInitConfig() {
   try {
+    if (global.feConfigs) return;
+
     const filename =
       process.env.NODE_ENV === 'development' ? 'data/config.local.json' : 'data/config.local.json';
     const res = JSON.parse(readFileSync(filename, 'utf-8'));

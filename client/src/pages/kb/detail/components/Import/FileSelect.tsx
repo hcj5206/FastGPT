@@ -2,7 +2,13 @@ import MyIcon from '@/components/Icon';
 import { useLoading } from '@/hooks/useLoading';
 import { useSelectFile } from '@/hooks/useSelectFile';
 import { useToast } from '@/hooks/useToast';
-import { fileDownload, readCsvContent, simpleText, splitText2Chunks } from '@/utils/file';
+import {
+  fileDownload,
+  readCsvContent,
+  simpleText,
+  splitText2Chunks,
+  uploadFiles
+} from '@/utils/file';
 import { Box, Flex, useDisclosure, type BoxProps } from '@chakra-ui/react';
 import { fileImgs } from '@/constants/common';
 import { DragEvent, useCallback, useState } from 'react';
@@ -11,7 +17,9 @@ import { readTxtContent, readPdfContent, readDocContent } from '@/utils/file';
 import { customAlphabet } from 'nanoid';
 import dynamic from 'next/dynamic';
 import MyTooltip from '@/components/MyTooltip';
-import { FetchResultItem } from '@/types/plugin';
+import { FetchResultItem, DatasetItemType } from '@/types/plugin';
+import { getErrText } from '@/utils/tools';
+import { useUserStore } from '@/store/user';
 
 const UrlFetchModal = dynamic(() => import('./UrlFetchModal'));
 const CreateFileModal = dynamic(() => import('./CreateFileModal'));
@@ -22,7 +30,7 @@ const csvTemplate = `question,answer,source\n"什么是 laf","laf 是一个云�
 export type FileItemType = {
   id: string;
   filename: string;
-  chunks: { q: string; a: string; source?: string }[];
+  chunks: DatasetItemType[];
   text: string;
   icon: string;
   tokens: number;
@@ -47,6 +55,7 @@ const FileSelect = ({
   showCreateFile = true,
   ...props
 }: Props) => {
+  const { kbDetail } = useUserStore();
   const { Loading: FileSelectLoading } = useLoading();
   const { t } = useTranslation();
 
@@ -58,7 +67,7 @@ const FileSelect = ({
   });
 
   const [isDragging, setIsDragging] = useState(false);
-  const [selecting, setSelecting] = useState(false);
+  const [selectingText, setSelectingText] = useState<string>();
 
   const {
     isOpen: isOpenUrlFetch,
@@ -73,17 +82,23 @@ const FileSelect = ({
 
   const onSelectFile = useCallback(
     async (files: File[]) => {
-      setSelecting(true);
       try {
         // Parse file by file
-        let promise = Promise.resolve<FileItemType[]>([]);
-        files.forEach((file) => {
-          promise = promise.then(async (result) => {
-            const extension = file?.name?.split('.')?.pop()?.toLowerCase();
+        const chunkFiles: FileItemType[] = [];
 
-            /* text file */
-            const icon = fileImgs.find((item) => new RegExp(item.reg).test(file.name))?.src;
-            let text = await (async () => {
+        for await (let file of files) {
+          const extension = file?.name?.split('.')?.pop()?.toLowerCase();
+
+          /* text file */
+          const icon = fileImgs.find((item) => new RegExp(item.suffix, 'gi').test(file.name))?.src;
+
+          if (!icon) {
+            continue;
+          }
+
+          // parse and upload files
+          let [text, filesId] = await Promise.all([
+            (async () => {
               switch (extension) {
                 case 'txt':
                 case 'md':
@@ -95,68 +110,75 @@ const FileSelect = ({
                   return readDocContent(file);
               }
               return '';
-            })();
-
-            if (!icon) return result;
-
-            if (text) {
-              text = simpleText(text);
-              const splitRes = splitText2Chunks({
-                text,
-                maxLen: chunkLen
-              });
-              const fileItem: FileItemType = {
-                id: nanoid(),
-                filename: file.name,
-                icon,
-                text,
-                tokens: splitRes.tokens,
-                chunks: splitRes.chunks.map((chunk) => ({
-                  q: chunk,
-                  a: '',
-                  source: file.name
-                }))
-              };
-              return [fileItem].concat(result);
-            }
-
-            /* csv file */
-            if (extension === 'csv') {
-              const { header, data } = await readCsvContent(file);
-              if (header[0] !== 'question' || header[1] !== 'answer') {
-                throw new Error('csv 文件格式有误,请确保 question 和 answer 两列');
+            })(),
+            uploadFiles([file], { kbId: kbDetail._id }, (percent) => {
+              if (percent < 100) {
+                setSelectingText(
+                  t('file.Uploading', { name: file.name.slice(0, 20), percent }) || ''
+                );
+              } else {
+                setSelectingText(t('file.Parse', { name: file.name.slice(0, 20) }) || '');
               }
-              const fileItem: FileItemType = {
-                id: nanoid(),
-                filename: file.name,
-                icon,
-                tokens: 0,
-                text: '',
-                chunks: data.map((item) => ({
-                  q: item[0],
-                  a: item[1],
-                  source: item[2] || file.name
-                }))
-              };
-              return [fileItem].concat(result);
+            })
+          ]);
+
+          if (text) {
+            text = simpleText(text);
+            const splitRes = splitText2Chunks({
+              text,
+              maxLen: chunkLen
+            });
+            const fileItem: FileItemType = {
+              id: nanoid(),
+              filename: file.name,
+              icon,
+              text,
+              tokens: splitRes.tokens,
+              chunks: splitRes.chunks.map((chunk) => ({
+                q: chunk,
+                a: '',
+                source: file.name,
+                file_id: filesId[0]
+              }))
+            };
+            chunkFiles.unshift(fileItem);
+            continue;
+          }
+
+          /* csv file */
+          if (extension === 'csv') {
+            const { header, data } = await readCsvContent(file);
+            if (header[0] !== 'question' || header[1] !== 'answer') {
+              throw new Error('csv 文件格式有误,请确保 question 和 answer 两列');
             }
-            return result;
-          });
-        });
+            const fileItem: FileItemType = {
+              id: nanoid(),
+              filename: file.name,
+              icon,
+              tokens: 0,
+              text: '',
+              chunks: data.map((item) => ({
+                q: item[0],
+                a: item[1],
+                source: item[2] || file.name,
+                file_id: filesId[0]
+              }))
+            };
 
-        const chunkFiles = await promise;
-
+            chunkFiles.unshift(fileItem);
+          }
+        }
         onPushFiles(chunkFiles);
       } catch (error: any) {
         console.log(error);
         toast({
-          title: typeof error === 'string' ? error : '解析文件失败',
+          title: getErrText(error, '解析文件失败'),
           status: 'error'
         });
       }
-      setSelecting(false);
+      setSelectingText(undefined);
     },
-    [chunkLen, onPushFiles, toast]
+    [chunkLen, onPushFiles, t, toast]
   );
   const onUrlFetch = useCallback(
     (e: FetchResultItem[]) => {
@@ -353,7 +375,9 @@ const FileSelect = ({
           {t('file.Click to download CSV template')}
         </Box>
       )}
-      <FileSelectLoading loading={selecting} fixed={false} />
+      {selectingText !== undefined && (
+        <FileSelectLoading loading text={selectingText} fixed={false} />
+      )}
       <File onSelect={onSelectFile} />
       {isOpenUrlFetch && <UrlFetchModal onClose={onCloseUrlFetch} onSuccess={onUrlFetch} />}
       {isOpenCreateFile && <CreateFileModal onClose={onCloseCreateFile} onSuccess={onCreateFile} />}

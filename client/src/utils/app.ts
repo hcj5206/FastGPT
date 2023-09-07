@@ -36,7 +36,7 @@ export type EditFormType = {
 };
 export const getDefaultAppForm = (): EditFormType => {
   const defaultChatModel = chatModelList[0];
-  const defaultVectorModel = vectorModelList[0];
+
   return {
     chatModel: {
       model: defaultChatModel.model,
@@ -49,7 +49,7 @@ export const getDefaultAppForm = (): EditFormType => {
     },
     kb: {
       list: [],
-      searchSimilarity: 0.8,
+      searchSimilarity: 0.4,
       searchLimit: 5,
       searchEmptyText: ''
     },

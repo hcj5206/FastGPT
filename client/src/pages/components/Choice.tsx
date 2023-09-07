@@ -1,8 +1,8 @@
 import { Box, Image, Flex, Grid, useTheme } from '@chakra-ui/react';
-import React, { useRef } from 'react';
+import React from 'react';
 import { useTranslation } from 'next-i18next';
 import MyTooltip from '@/components/MyTooltip';
-import MyIcon from '@/components/Icon';
+import { feConfigs } from '@/store/static';
 
 const Choice = () => {
   const theme = useTheme();
@@ -72,7 +72,7 @@ const Choice = () => {
               _hover={{
                 bg: 'rgba(255,255,255,0.8)'
               }}
-              onClick={item.onClick}
+              onClick={() => item.onClick?.()}
             >
               <Flex
                 flex={'0 0 48px'}

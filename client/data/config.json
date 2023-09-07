@@ -4,14 +4,15 @@
     "show_register": false,
     "show_appStore": false,
     "show_userDetail": false,
+    "show_contact": true,
     "show_git": true,
+    "show_doc": true,
     "systemTitle": "FastGPT",
     "authorText": "Made by FastGPT Team.",
     "gitLoginKey": "",
     "scripts": []
   },
   "SystemParams": {
-    "gitLoginSecret": "",
     "vectorMaxProcess": 15,
     "qaMaxProcess": 15,
     "pgIvfflatProbe": 20
@@ -49,7 +50,9 @@
     {
       "model": "text-embedding-ada-002",
       "name": "Embedding-2",
-      "price": 0
+      "price": 0,
+      "defaultToken": 500,
+      "maxToken": 3000
     }
   ],
   "QAModel": {

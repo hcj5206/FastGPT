@@ -1,21 +1,23 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, Flex, Button, useTheme, Image } from '@chakra-ui/react';
 import { useToast } from '@/hooks/useToast';
 import { useConfirm } from '@/hooks/useConfirm';
 import { useMutation } from '@tanstack/react-query';
 import { postKbDataFromList } from '@/api/plugins/kb';
 import { getErrText } from '@/utils/tools';
-import { vectorModelList } from '@/store/static';
 import MyIcon from '@/components/Icon';
 import DeleteIcon, { hoverDeleteStyles } from '@/components/Icon/delete';
 import { TrainingModeEnum } from '@/constants/plugin';
 import FileSelect, { type FileItemType } from './FileSelect';
 import { useRouter } from 'next/router';
+import { useUserStore } from '@/store/user';
 
 const fileExtension = '.csv';
 
 const CsvImport = ({ kbId }: { kbId: string }) => {
-  const model = vectorModelList[0]?.model;
+  const { kbDetail } = useUserStore();
+  const maxToken = kbDetail.vectorModel?.maxToken || 2000;
+
   const theme = useTheme();
   const router = useRouter();
   const { toast } = useToast();
@@ -35,15 +37,27 @@ const CsvImport = ({ kbId }: { kbId: string }) => {
 
   const { mutate: onclickUpload, isLoading: uploading } = useMutation({
     mutationFn: async () => {
-      const chunks = files.map((file) => file.chunks).flat();
+      const chunks = files
+        .map((file) => file.chunks)
+        .flat()
+        .filter((item) => item?.q);
+
+      const filterChunks = chunks.filter((item) => item.q.length < maxToken);
+
+      if (filterChunks.length !== chunks.length) {
+        toast({
+          title: `${chunks.length - filterChunks.length}条数据超出长度，已被过滤`,
+          status: 'info'
+        });
+      }
 
       // subsection import
       let success = 0;
-      const step = 500;
-      for (let i = 0; i < chunks.length; i += step) {
+      const step = 300;
+      for (let i = 0; i < filterChunks.length; i += step) {
         const { insertLen } = await postKbDataFromList({
           kbId,
-          data: chunks.slice(i, i + step),
+          data: filterChunks.slice(i, i + step),
           mode: TrainingModeEnum.index
         });
 

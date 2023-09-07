@@ -4,6 +4,7 @@ import type { Pool } from 'pg';
 import type { Tiktoken } from '@dqbd/tiktoken';
 import type { Logger } from 'winston';
 import { ChatModelItemType, QAModelItemType, VectorModelItemType } from './model';
+import { TrackEventName } from '@/constants/common';
 
 export type PagingData<T> = {
   pageNum: number;
@@ -19,7 +20,9 @@ export type FeConfigsType = {
   show_register?: boolean;
   show_appStore?: boolean;
   show_userDetail?: boolean;
+  show_contact?: boolean;
   show_git?: boolean;
+  show_doc?: boolean;
   systemTitle?: string;
   authorText?: string;
   beianText?: string;
@@ -29,7 +32,6 @@ export type FeConfigsType = {
 };
 export type SystemEnvType = {
   pluginBaseUrl?: string;
-  gitLoginSecret?: string;
   vectorMaxProcess: number;
   qaMaxProcess: number;
   pgIvfflatProbe: number;
@@ -59,5 +61,8 @@ declare global {
     particlesJS: any;
     grecaptcha: any;
     QRCode: any;
+    umami?: {
+      track: (event: `${TrackEventName}`, data: any) => void;
+    };
   }
 }
