@@ -16,8 +16,14 @@ FastGPT 默认使用了 openai 的 embedding 向量模型，如果你想私有�
 镜像名: `stawky/m3e-large-api:latest`  
 国内镜像： `registry.cn-guangzhou.aliyuncs.com/kbgpt/m3e-large-api:latest`
 端口号: 6008
+环境变量：
 
-## 接入 OneAPI
+```
+# 设置安全凭证
+sk-key=xxxx
+```
+
+## 接入 One API
 
 添加一个渠道，参数如下：
 
@@ -29,7 +35,7 @@ curl 例子：
 
 ```bash
 curl --location --request POST 'https://domain/v1/embeddings' \
---header 'Authorization: Bearer sk-key' \
+--header 'Authorization: Bearer xxxx' \
 --header 'Content-Type: application/json' \
 --data-raw '{
   "model": "m3e",
@@ -37,7 +43,7 @@ curl --location --request POST 'https://domain/v1/embeddings' \
 }'
 ```
 
-Authorization 为 sk-key。model 为刚刚在 OneAPI 填写的自定义模型。
+Authorization 为 sk-key。model 为刚刚在 One API 填写的自定义模型。
 
 ## 接入 FastGPT
 
@@ -66,17 +72,17 @@ Authorization 为 sk-key。model 为刚刚在 OneAPI 填写的自定义模型。
 
 1. 创建知识库时候选择 M3E 模型。
 
-注意，一旦选择后，知识库将无法修改向量模型。
+      注意，一旦选择后，知识库将无法修改向量模型。
 
-![](/imgs/model-m3e2.png)
+      ![](/imgs/model-m3e2.png)
 
 2. 导入数据
 3. 搜索测试
 
-![](/imgs/model-m3e3.png)
+      ![](/imgs/model-m3e3.png)
 
 4. 应用绑定知识库
 
-注意，应用只能绑定同一个向量模型的知识库，不能跨模型绑定。并且，需要注意调整相似度，不同向量模型的相似度（距离）会有所区别，需要自行测试实验。
+      注意，应用只能绑定同一个向量模型的知识库，不能跨模型绑定。并且，需要注意调整相似度，不同向量模型的相似度（距离）会有所区别，需要自行测试实验。
 
-![](/imgs/model-m3e4.png)
+      ![](/imgs/model-m3e4.png)

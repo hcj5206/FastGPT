@@ -9,6 +9,7 @@ const Choice = () => {
   const { t } = useTranslation();
 
   const list = [
+<<<<<<< HEAD
     ...(feConfigs?.show_git
       ? [
           {
@@ -30,26 +31,60 @@ const Choice = () => {
       icon: '/imgs/home/icon_2.svg',
       title: t('home.Choice QA'),
       desc: t('home.Choice QA Desc')
+=======
+    {
+      icon: '/imgs/home/icon_1.svg',
+      title: t('home.Choice Open'),
+      desc: t('home.Choice Open Desc'),
+      tooltip: '前往 GitHub',
+      onClick: () => { }
+    },
+    {
+      icon: '/imgs/home/icon_2.svg',
+      title: t('home.Choice QA'),
+      desc: t('home.Choice QA Desc'),
+      onClick: () => { }
+>>>>>>> 3f3e07c7a508955bb6f87be7a2e0e7ec00bcc487
     },
     {
       icon: '/imgs/home/icon_3.svg',
       title: t('home.Choice Visual'),
+<<<<<<< HEAD
       desc: t('home.Choice Visual Desc')
+=======
+      desc: t('home.Choice Visual Desc'),
+      onClick: () => { }
+>>>>>>> 3f3e07c7a508955bb6f87be7a2e0e7ec00bcc487
     },
     {
       icon: '/imgs/home/icon_4.svg',
       title: t('home.Choice Extension'),
+<<<<<<< HEAD
       desc: t('home.Choice Extension Desc')
+=======
+      desc: t('home.Choice Extension Desc'),
+      onClick: () => { }
+>>>>>>> 3f3e07c7a508955bb6f87be7a2e0e7ec00bcc487
     },
     {
       icon: '/imgs/home/icon_5.svg',
       title: t('home.Choice Debug'),
+<<<<<<< HEAD
       desc: t('home.Choice Debug Desc')
+=======
+      desc: t('home.Choice Debug Desc'),
+      onClick: () => { }
+>>>>>>> 3f3e07c7a508955bb6f87be7a2e0e7ec00bcc487
     },
     {
       icon: '/imgs/home/icon_6.svg',
       title: t('home.Choice Models'),
+<<<<<<< HEAD
       desc: t('home.Choice Models Desc')
+=======
+      desc: t('home.Choice Models Desc'),
+      onClick: () => { }
+>>>>>>> 3f3e07c7a508955bb6f87be7a2e0e7ec00bcc487
     }
   ];
 
@@ -62,7 +97,11 @@ const Choice = () => {
         fontSize={['22px', '30px']}
         fontWeight={'bold'}
       >
+<<<<<<< HEAD
         {t('home.Why FastGPT', { title: feConfigs?.systemTitle })}
+=======
+        {/* {t('home.Why XiaoHu')} */}
+>>>>>>> 3f3e07c7a508955bb6f87be7a2e0e7ec00bcc487
       </Box>
       <Grid px={[5, 0]} gridTemplateColumns={['1fr', `1fr 1fr`, 'repeat(3,1fr)']} gridGap={6}>
         {list.map((item) => (

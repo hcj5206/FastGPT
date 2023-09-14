@@ -55,11 +55,11 @@ brew install orbstack
 {{< tab tabName="Windows" >}}
 {{< markdownify >}}
 
-> 我们建议将源代码和其他数据绑定到 Linux 容器中时，将其存储在 Linux 文件系统中，而不是 Windows 文件系统中。
->
-> 可以选择直接[使用 WSL 2 后端在 Windows 中安装 Docker Desktop](https://docs.docker.com/desktop/wsl/)。
->
-> 也可以直接[在 WSL 2 中安装命令行版本的 Docker](https://nickjanetakis.com/blog/install-docker-in-wsl-2-without-docker-desktop)。
+我们建议将源代码和其他数据绑定到 Linux 容器中时，将其存储在 Linux 文件系统中，而不是 Windows 文件系统中。
+
+可以选择直接[使用 WSL 2 后端在 Windows 中安装 Docker Desktop](https://docs.docker.com/desktop/wsl/)。
+
+也可以直接[在 WSL 2 中安装命令行版本的 Docker](https://nickjanetakis.com/blog/install-docker-in-wsl-2-without-docker-desktop)。
 
 {{< /markdownify >}}
 {{< /tab >}}
@@ -133,6 +133,7 @@ services:
       - DB_MAX_LINK=5 # database max link
       - TOKEN_KEY=any
       - ROOT_KEY=root_key
+      - FILE_TOKEN_KEY=filetoken
       # mongo 配置，不需要改. 如果连不上，可能需要去掉 ?authSource=admin
       - MONGODB_URI=mongodb://username:password@mongo:27017/fastgpt?authSource=admin
       # pg配置. 不需要改
@@ -158,7 +159,12 @@ docker-compose up -d
 
 ### 如何更新？
 
-执行 `docker-compose up -d` 会自动拉取最新镜像，一般情况下不需要执行额外操作。
+执行下面命令会自动拉取最新镜像，一般情况下不需要执行额外操作。
+
+```bash
+docker-compose pull
+docker-compose up -d
+```
 
 ### 如何自定义配置文件？
 

@@ -37,7 +37,7 @@ import { fileDownload } from '@/utils/file';
 import { htmlTemplate } from '@/constants/common';
 import { useRouter } from 'next/router';
 import { useGlobalStore } from '@/store/global';
-import { TaskResponseKeyEnum, getDefaultChatVariables } from '@/constants/chat';
+import { TaskResponseKeyEnum } from '@/constants/chat';
 import { useTranslation } from 'react-i18next';
 import { customAlphabet } from 'nanoid';
 import { userUpdateChatFeedback, adminUpdateChatFeedback } from '@/api/chat';
@@ -350,10 +350,7 @@ const ChatBox = (
           messages,
           controller: abortSignal,
           generatingMessage,
-          variables: {
-            ...getDefaultChatVariables(),
-            ...variables
-          }
+          variables
         });
 
         // set finish status
@@ -439,13 +436,20 @@ const ChatBox = (
     border: theme.borders.base,
     mr: 3
   };
-  const controlContainerStyle = {
-    className: 'control',
-    color: 'myGray.400',
-    display: feedbackType === FeedbackTypeEnum.admin ? 'flex' : ['flex', 'none'],
-    pl: 1,
-    mt: 2
-  };
+  const controlContainerStyle = useCallback((status: ChatSiteItemType['status']) => {
+    return {
+      className: 'control',
+      color: 'myGray.400',
+      display:
+        status === 'finish'
+          ? feedbackType === FeedbackTypeEnum.admin
+            ? 'flex'
+            : ['flex', 'none']
+          : 'none',
+      pl: 1,
+      mt: 2
+    };
+  }, []);
   const MessageCardStyle: BoxProps = {
     px: 4,
     py: 3,
@@ -512,7 +516,7 @@ const ChatBox = (
   return (
     <Flex flexDirection={'column'} h={'100%'}>
       <Box ref={ChatBoxRef} flex={'1 0 0'} h={0} w={'100%'} overflow={'overlay'} px={[4, 0]} pb={3}>
-        <Box maxW={['100%', '92%']} h={'100%'} mx={'auto'}>
+        <Box id="chat-container" maxW={['100%', '92%']} h={'100%'} mx={'auto'}>
           {showEmpty && <Empty />}
 
           {!!welcomeText && (
@@ -558,6 +562,9 @@ const ChatBox = (
                           label: item.value,
                           value: item.value
                         }))}
+                        {...register(item.key, {
+                          required: item.required
+                        })}
                         value={getValues(item.key)}
                         onchange={(e) => {
                           setValue(item.key, e);
@@ -604,7 +611,11 @@ const ChatBox = (
                 {item.obj === 'Human' && (
                   <>
                     <Flex w={'100%'} alignItems={'center'} justifyContent={'flex-end'}>
-                      <Flex {...controlContainerStyle} justifyContent={'flex-end'} mr={3}>
+                      <Flex
+                        {...controlContainerStyle(item.status)}
+                        justifyContent={'flex-end'}
+                        mr={3}
+                      >
                         <MyTooltip label={'复制'}>
                           <MyIcon
                             {...controlIconStyle}
@@ -652,7 +663,7 @@ const ChatBox = (
                   <>
                     <Flex w={'100%'} alignItems={'flex-end'}>
                       <ChatAvatar src={appAvatar} type={'AI'} />
-                      <Flex {...controlContainerStyle} ml={3}>
+                      <Flex {...controlContainerStyle(item.status)} ml={3}>
                         <MyTooltip label={'复制'}>
                           <MyIcon
                             {...controlIconStyle}

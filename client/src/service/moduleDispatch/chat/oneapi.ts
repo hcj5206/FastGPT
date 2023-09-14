@@ -8,7 +8,7 @@ import type { ChatHistoryItemResType } from '@/types/chat';
 import { ChatModuleEnum, ChatRoleEnum, sseResponseEventEnum } from '@/constants/chat';
 import { SSEParseData, parseStreamChunk } from '@/utils/sse';
 import { textAdaptGptResponse } from '@/utils/adapt';
-import { getAIChatApi, axiosConfig } from '@/service/ai/openai';
+import { getAIChatApi, axiosConfig } from '@/service/lib/openai';
 import { TaskResponseKeyEnum } from '@/constants/chat';
 import { getChatModel } from '@/service/utils/data';
 import { countModelPrice } from '@/service/events/pushBill';
@@ -98,7 +98,7 @@ export const dispatchChatCompletion = async (props: Record<string, any>): Promis
   });
   // console.log(messages);
 
-  // FastGpt temperature range: 1~10
+  // FastGPT temperature range: 1~10
   temperature = +(modelConstantsData.maxTemperature * (temperature / 10)).toFixed(2);
   temperature = Math.max(temperature, 0.01);
   const chatAPI = getAIChatApi(userOpenaiAccount);
@@ -119,12 +119,10 @@ export const dispatchChatCompletion = async (props: Record<string, any>): Promis
           : []),
         ...messages
       ],
-      // frequency_penalty: 0.5, // 越大，重复内容越少
-      // presence_penalty: -0.5, // 越大，越容易出现新内容
       stream
     },
     {
-      timeout: stream ? 120000 : 480000,
+      timeout: 480000,
       responseType: stream ? 'stream' : 'json',
       ...axiosConfig(userOpenaiAccount)
     }
@@ -239,25 +237,16 @@ function getChatMessages({
   model: ChatModelItemType;
   hasQuoteOutput: boolean;
 }) {
-  const limitText = (() => {
-    if (!quotePrompt) {
-      return limitPrompt;
-    }
-    const defaultPrompt = `三引号引用的内容是我提供给你的知识，它们拥有最高优先级。instruction 是相关介绍${
-      hasQuoteOutput ? '，output 是预期回答或补充' : ''
-    }，使用引用内容来回答我下面的问题。`;
-    if (limitPrompt) {
-      return `${defaultPrompt}${limitPrompt}`;
-    }
-    return `${defaultPrompt}\n回答内容限制：你仅回答三引号中提及的内容，下面我提出的问题与引用内容无关时，你可以直接回复: "你的问题没有在知识库中体现"`;
-  })();
+  const { quoteGuidePrompt } = getDefaultPrompt({ hasQuoteOutput });
+
+  const systemText = `${quotePrompt ? `${quoteGuidePrompt}\n\n` : ''}${systemPrompt}`;
 
   const messages: ChatItemType[] = [
-    ...(systemPrompt
+    ...(systemText
       ? [
           {
             obj: ChatRoleEnum.System,
-            value: systemPrompt
+            value: systemText
           }
         ]
       : []),
@@ -270,11 +259,11 @@ function getChatMessages({
         ]
       : []),
     ...history,
-    ...(limitText
+    ...(limitPrompt
       ? [
           {
             obj: ChatRoleEnum.System,
-            value: limitText
+            value: limitPrompt
           }
         ]
       : []),
@@ -385,5 +374,13 @@ async function streamResponse({
 
   return {
     answer
+  };
+}
+
+function getDefaultPrompt({ hasQuoteOutput }: { hasQuoteOutput?: boolean }) {
+  return {
+    quoteGuidePrompt: `三引号引用的内容是我提供给你的知识库，它们拥有最高优先级。instruction 是相关介绍${
+      hasQuoteOutput ? '，output 是预期回答或补充。' : '。'
+    }`
   };
 }
