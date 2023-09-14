@@ -18,6 +18,8 @@ FastGPT 是一个基于 LLM 大语言模型的知识库问答系统，提供开�
   <a href="https://github.com/labring/FastGPT#-%E7%9B%B8%E5%85%B3%E9%A1%B9%E7%9B%AE">相关项目</a>
 </p>
 
+https://github.com/labring/FastGPT/assets/15308462/7d3a38df-eb0e-4388-9250-2409bd33f6d4
+
 ## 🛸 在线体验
 
 [fastgpt.run](https://fastgpt.run/)（服务器在新加坡，部分地区可能无法直连）
@@ -48,7 +50,7 @@ FastGPT 是一个基于 LLM 大语言模型的知识库问答系统，提供开�
    - [x] 支持 url 读取、 CSV 批量导入
    - [x] 支持知识库单独设置向量模型
    - [x] 源文件存储
-   - [x] 文件学习 Agent
+   - [ ] 文件学习 Agent
 3. 多种效果测试渠道
    - [x] 知识库单点搜索测试
    - [x] 对话时反馈引用并可修改与删除
@@ -91,7 +93,6 @@ FastGPT 是一个基于 LLM 大语言模型的知识库问答系统，提供开�
 
 - [FastGPT 常见问题](https://kjqvjse66l.feishu.cn/docx/HtrgdT0pkonP4kxGx8qcu6XDnGh)
 - [docker 部署教程视频](https://www.bilibili.com/video/BV1jo4y147fT/)
-- [公众号接入视频教程](https://www.bilibili.com/video/BV1xh4y1t7fy/)
 - [FastGPT 知识库演示](https://www.bilibili.com/video/BV1Wo4y1p7i1/)
 
 ## 💪 相关项目
@@ -103,6 +104,7 @@ FastGPT 是一个基于 LLM 大语言模型的知识库问答系统，提供开�
 
 ## 🤝 第三方生态
 
+- [OnWeChat 个人微信/企微机器人](https://doc.fastgpt.run/docs/use-cases/onwechat/)
 - [luolinAI: 企微机器人，开箱即用](https://github.com/luolin-ai/FastGPT-Enterprise-WeChatbot)
 
 ## 🌟 Star History

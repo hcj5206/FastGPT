@@ -24,6 +24,7 @@ const map = {
   out: require('./icons/out.svg').default,
   git: require('./icons/git.svg').default,
   gitFill: require('./icons/fill/git.svg').default,
+  googleFill: require('./icons/fill/google.svg').default,
   menu: require('./icons/menu.svg').default,
   edit: require('./icons/edit.svg').default,
   inform: require('./icons/inform.svg').default,
@@ -79,7 +80,12 @@ const map = {
   promotionLight: require('./icons/light/promotion.svg').default,
   logsLight: require('./icons/light/logs.svg').default,
   badLight: require('./icons/light/bad.svg').default,
-  markLight: require('./icons/light/mark.svg').default
+  markLight: require('./icons/light/mark.svg').default,
+  retryLight: require('./icons/light/retry.svg').default,
+  rightArrowLight: require('./icons/light/rightArrow.svg').default,
+  searchLight: require('./icons/light/search.svg').default,
+  plusFill: require('./icons/fill/plus.svg').default,
+  moveLight: require('./icons/light/move.svg').default
 };
 
 export type IconName = keyof typeof map;

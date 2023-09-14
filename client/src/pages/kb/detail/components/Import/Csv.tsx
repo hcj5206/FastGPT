@@ -10,12 +10,13 @@ import DeleteIcon, { hoverDeleteStyles } from '@/components/Icon/delete';
 import { TrainingModeEnum } from '@/constants/plugin';
 import FileSelect, { type FileItemType } from './FileSelect';
 import { useRouter } from 'next/router';
-import { useUserStore } from '@/store/user';
+import { useDatasetStore } from '@/store/dataset';
+import { updateDatasetFile } from '@/api/core/dataset/file';
 
 const fileExtension = '.csv';
 
 const CsvImport = ({ kbId }: { kbId: string }) => {
-  const { kbDetail } = useUserStore();
+  const { kbDetail } = useDatasetStore();
   const maxToken = kbDetail.vectorModel?.maxToken || 2000;
 
   const theme = useTheme();
@@ -37,12 +38,22 @@ const CsvImport = ({ kbId }: { kbId: string }) => {
 
   const { mutate: onclickUpload, isLoading: uploading } = useMutation({
     mutationFn: async () => {
+      // mark the file is used
+      await Promise.all(
+        files.map((file) =>
+          updateDatasetFile({
+            id: file.id,
+            datasetUsed: true
+          })
+        )
+      );
+
       const chunks = files
         .map((file) => file.chunks)
         .flat()
         .filter((item) => item?.q);
 
-      const filterChunks = chunks.filter((item) => item.q.length < maxToken);
+      const filterChunks = chunks.filter((item) => item.q.length < maxToken * 1.5);
 
       if (filterChunks.length !== chunks.length) {
         toast({
@@ -73,7 +84,7 @@ const CsvImport = ({ kbId }: { kbId: string }) => {
       router.replace({
         query: {
           kbId,
-          currentTab: 'data'
+          currentTab: 'dataset'
         }
       });
     },

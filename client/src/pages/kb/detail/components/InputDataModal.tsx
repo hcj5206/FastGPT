@@ -2,17 +2,17 @@ import React, { useState, useCallback } from 'react';
 import { Box, Flex, Button, Textarea, IconButton, BoxProps } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { insertData2Kb, putKbDataById, delOneKbDataByDataId } from '@/api/plugins/kb';
-import { getFileViewUrl } from '@/api/system';
+import { getFileViewUrl } from '@/api/support/file';
 import { useToast } from '@/hooks/useToast';
 import { getErrText } from '@/utils/tools';
 import MyIcon from '@/components/Icon';
 import MyModal from '@/components/MyModal';
 import MyTooltip from '@/components/MyTooltip';
 import { QuestionOutlineIcon } from '@chakra-ui/icons';
-import { useUserStore } from '@/store/user';
 import { useQuery } from '@tanstack/react-query';
 import { DatasetItemType } from '@/types/plugin';
 import { useTranslation } from 'react-i18next';
+import { useDatasetStore } from '@/store/dataset';
 
 export type FormData = { dataId?: string } & DatasetItemType;
 
@@ -36,7 +36,7 @@ const InputDataModal = ({
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
-  const { kbDetail, getKbDetail } = useUserStore();
+  const { kbDetail, getKbDetail } = useDatasetStore();
 
   const { getValues, register, handleSubmit, reset } = useForm<FormData>({
     defaultValues
@@ -261,13 +261,11 @@ export function RawFileText({ fileId, filename = '', ...props }: RawFileTextProp
       <Box
         color={'myGray.600'}
         display={'inline-block'}
+        whiteSpace={'nowrap'}
         {...(!!fileId
           ? {
               cursor: 'pointer',
-              textDecoration: ['underline', 'none'],
-              _hover: {
-                textDecoration: 'underline'
-              },
+              textDecoration: 'underline',
               onClick: async () => {
                 try {
                   const url = await getFileViewUrl(fileId);

@@ -3,7 +3,8 @@ import { jsonRes } from '@/service/response';
 import { connectToDatabase, User } from '@/service/mongo';
 import { authUser } from '@/service/utils/auth';
 import { PgClient } from '@/service/pg';
-import { PgTrainingTableName } from '@/constants/plugin';
+import { PgDatasetTableName } from '@/constants/plugin';
+import { findAllChildrenIds } from '../delete';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<any>) {
   try {
@@ -20,7 +21,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     // 凭证校验
     const { userId } = await authUser({ req, authToken: true });
 
-    const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const exportIds = [kbId, ...(await findAllChildrenIds(kbId))];
+    console.log(exportIds);
+
+    const thirtyMinutesAgo = new Date(
+      Date.now() - (global.feConfigs?.limit?.exportLimitMinutes || 0) * 60 * 1000
+    );
 
     // auth export times
     const authTimes = await User.findOne(
@@ -35,21 +41,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
     );
 
     if (!authTimes) {
-      throw new Error('上次导出未到半小时，每半小时仅可导出一次。');
+      const minutes = `${global.feConfigs?.limit?.exportLimitMinutes || 0} 分钟`;
+      throw new Error(`上次导出未到 ${minutes}，每 ${minutes}仅可导出一次。`);
     }
 
-    // 统计数据
-    const count = await PgClient.count(PgTrainingTableName, {
-      where: [['kb_id', kbId], 'AND', ['user_id', userId]]
-    });
+    const where: any = [
+      ['user_id', userId],
+      'AND',
+      `kb_id IN (${exportIds.map((id) => `'${id}'`).join(',')})`
+    ];
     // 从 pg 中获取所有数据
     const pgData = await PgClient.select<{ q: string; a: string; source: string }>(
-      PgTrainingTableName,
+      PgDatasetTableName,
       {
-        where: [['kb_id', kbId], 'AND', ['user_id', userId]],
+        where,
         fields: ['q', 'a', 'source'],
         order: [{ field: 'id', mode: 'DESC' }],
-        limit: count
+        limit: 1000000
       }
     );
 
@@ -78,7 +86,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: '100mb'
+      sizeLimit: '200mb'
     }
   }
 };

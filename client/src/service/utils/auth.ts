@@ -155,7 +155,7 @@ export const authUser = async ({
   })();
 
   return {
-    userId: uid,
+    userId: String(uid),
     appId,
     authType,
     user
@@ -207,25 +207,4 @@ export const authKb = async ({ kbId, userId }: { kbId: string; userId: string })
     return kb;
   }
   return Promise.reject(ERROR_ENUM.unAuthKb);
-};
-
-export const authShareChat = async ({ shareId }: { shareId: string }) => {
-  // get shareChat
-  const shareChat = await OutLink.findOne({ shareId });
-
-  if (!shareChat) {
-    return Promise.reject('分享链接已失效');
-  }
-
-  const uid = String(shareChat.userId);
-
-  // authBalance
-  const user = await authBalanceByUid(uid);
-
-  return {
-    user,
-    userId: String(shareChat.userId),
-    appId: String(shareChat.appId),
-    authType: AuthUserTypeEnum.token
-  };
 };

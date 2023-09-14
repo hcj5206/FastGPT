@@ -1,6 +1,5 @@
 import { GET, POST, PUT, DELETE } from '../request';
-import type { DatasetItemType, KbItemType, KbListItemType } from '@/types/plugin';
-import { RequestPaging } from '@/types/index';
+import type { DatasetItemType, KbItemType, KbListItemType, KbPathItemType } from '@/types/plugin';
 import { TrainingModeEnum } from '@/constants/plugin';
 import {
   Props as PushDataProps,
@@ -10,13 +9,18 @@ import {
   Props as SearchTestProps,
   Response as SearchTestResponse
 } from '@/pages/api/openapi/kb/searchTest';
-import { Response as KbDataItemType } from '@/pages/api/plugins/kb/data/getDataById';
 import { Props as UpdateDataProps } from '@/pages/api/openapi/kb/updateData';
-import type { KbUpdateParams, CreateKbParams } from '../request/kb';
+import type { KbUpdateParams, CreateKbParams, GetKbDataListProps } from '../request/kb';
 import { QuoteItemType } from '@/types/chat';
+import { KbTypeEnum } from '@/constants/kb';
 
 /* knowledge base */
-export const getKbList = () => GET<KbListItemType[]>(`/plugins/kb/list`);
+export const getKbList = (data: { parentId?: string; type?: `${KbTypeEnum}` }) =>
+  GET<KbListItemType[]>(`/plugins/kb/list`, data);
+export const getAllDataset = () => GET<KbListItemType[]>(`/plugins/kb/allDataset`);
+
+export const getKbPaths = (parentId?: string) =>
+  GET<KbPathItemType[]>('/plugins/kb/paths', { parentId });
 
 export const getKbById = (id: string) => GET<KbItemType>(`/plugins/kb/detail?id=${id}`);
 
@@ -27,24 +31,16 @@ export const putKbById = (data: KbUpdateParams) => PUT(`/plugins/kb/update`, dat
 export const delKbById = (id: string) => DELETE(`/plugins/kb/delete?id=${id}`);
 
 /* kb data */
-type GetKbDataListProps = RequestPaging & {
-  kbId: string;
-  searchText: string;
-};
 export const getKbDataList = (data: GetKbDataListProps) =>
   POST(`/plugins/kb/data/getDataList`, data);
 
 /**
  * 获取导出数据（不分页）
  */
-export const getExportDataList = (kbId: string) =>
-  GET<[string, string, string][]>(
-    `/plugins/kb/data/exportModelData`,
-    { kbId },
-    {
-      timeout: 600000
-    }
-  );
+export const getExportDataList = (data: { kbId: string }) =>
+  GET<[string, string, string][]>(`/plugins/kb/data/exportModelData`, data, {
+    timeout: 600000
+  });
 
 /**
  * 获取模型正在拆分数据的数量
